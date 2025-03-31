@@ -1,42 +1,91 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+@import "tailwindcss";
+
+
+/* Define custom colors using CSS variables */
+:root {
+    --color-primary: #3498db;      /* Blue color for primary actions */
+    --color-secondary: #2ecc71;    /* Green color for secondary actions */
+    --color-accent: #e74c3c;       /* Red color for accents or errors */
+    --color-background: #f5f5f5;   /* Light background color */
+    --color-textPrimary: #333333;  /* Dark text color for primary text */
+    --color-textSecondary: #666666; /* Lighter text color for secondary text */
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Reusable classes for primary, secondary, and accent colors */
+.primary-color {
+    color: var(--color-primary);
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.secondary-color {
+    color: var(--color-secondary);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.accent-color {
+    color: var(--color-accent);
 }
 
-.card {
-  padding: 2em;
+.bg-primary {
+    background-color: var(--color-primary);
 }
 
-.read-the-docs {
-  color: #888;
+.bg-secondary {
+    background-color: var(--color-secondary);
+}
+
+.bg-accent {
+    background-color: var(--color-accent);
+}
+
+.text-primary {
+    color: var(--color-textPrimary);
+}
+
+.text-secondary {
+    color: var(--color-textSecondary);
+}
+
+.bg-background {
+    background-color: var(--color-background);
+}
+
+/* Button Styles */
+.btn {
+    display: inline-block;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9; /* Darker shade of primary */
+    transform: scale(1.05);
+}
+
+.btn-secondary {
+    background-color: var(--color-secondary);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #27ae60; /* Darker shade of secondary */
+    transform: scale(1.05);
+}
+
+.btn-accent {
+    background-color: var(--color-accent);
+    color: white;
+}
+
+.btn-accent:hover {
+    background-color: #c0392b; /* Darker shade of accent */
+    transform: scale(1.05);
 }

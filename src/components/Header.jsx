@@ -8,8 +8,8 @@ export default function Header() {
     const location = useLocation(); // Hook to get the current route
 
     return (
-        <header className="sticky top-0 w-full bg-white  z-50">
-            <div className="container mx-auto flex justify-between items-center p-4">
+        <header className="sticky top-0 w-full bg-white z-50">
+            <div className=" mx-auto flex justify-between items-center p-4">
                 {/* Left Side: Logo & Search */}
                 <div className="flex items-center gap-4">
                     <h1 className="text-2xl font-bold">

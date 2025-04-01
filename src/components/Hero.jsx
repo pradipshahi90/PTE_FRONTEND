@@ -1,9 +1,9 @@
 import React from 'react';
-import heroImage from '../assets/hero.svg'; // Adjust the path as needed
+    import heroImage from '../assets/hero.svg'; // Adjust the path as needed
 
 export default function Hero() {
     return (
-        <section className="flex flex-col-reverse md:flex-row items-center justify-between p-6 md:p-12">
+        <section className="flex flex-col-reverse md:flex-row items-center justify-between">
             {/* Left Side: Text */}
             <div className="w-full md:w-1/2 text-center md:text-left space-y-4">
                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900">

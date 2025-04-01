@@ -14,6 +14,7 @@
 /* Reusable classes for primary, secondary, and accent colors */
 .primary-color {
     color: var(--color-primary);
+
 }
 
 .secondary-color {

@@ -2,10 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { GenericRepo } from "../../repo/GenericRepo.js";
 import { Api } from "../../utils/Api.js";
 import AdminLayout from "../../layouts/AdminLayout.jsx";
+import DeleteConfirmation from "../../components/DeleteConfirmation.jsx";
 
 const App = () => {
     const repo = new GenericRepo();
     const [questions, setQuestions] = useState([]);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [itemId, setItemId] = useState(null);
+
 
     const getReadingMaterials = () => {
         repo.list(
@@ -32,6 +36,34 @@ const App = () => {
                 q.id === id ? { ...q, showAnswer: !q.showAnswer } : q
             )
         );
+    };
+
+    // Example function that handles the deletion of the item by ID
+    const handleDelete = (id) => {
+        repo.destroy(
+            `${Api.GET_READING_MATERIAL}/${id}`,
+            (data) =>{
+                console.log('data', data);
+                closeDeleteModal();
+                getReadingMaterials();
+            },
+            (error)=>{
+                console.log('error',error);
+                closeDeleteModal();
+            }
+
+        )
+    };
+
+    // Open the delete modal and set the item ID
+    const openDeleteModal = (id) => {
+        setItemId(id);
+        setShowDeleteModal(true);
+    };
+
+    // Close the delete modal
+    const closeDeleteModal = () => {
+        setShowDeleteModal(false);
     };
 
     return (
@@ -69,15 +101,13 @@ const App = () => {
 
                             {/* Edit/Delete Buttons */}
                             <div className="flex justify-between items-center mt-4">
-                                <button
-                                    onClick={() => {}}
+                                <a href={`/admin/reading-materials/edit/${question.slug}`}
                                     className="bg-yellow-500 text-white py-1 px-4 rounded-lg hover:bg-yellow-600 transition-all duration-300"
                                 >
                                     Edit
-                                </button>
-                                <button
-                                    onClick={() => {}}
-                                    className="bg-red-500 text-white py-1 px-4 rounded-lg hover:bg-red-600 transition-all duration-300"
+                                </a>
+                                <button onClick={() => openDeleteModal(question.id)}
+                                        className="bg-red-500 text-white py-1 px-4 cursor-pointer rounded-lg hover:bg-red-600 transition-all duration-300"
                                 >
                                     Delete
                                 </button>
@@ -89,6 +119,13 @@ const App = () => {
                 )}
             </div>
         </div>
+            {showDeleteModal && (
+                <DeleteConfirmation
+                    id={itemId}
+                    onDelete={handleDelete}
+                    onClose={closeDeleteModal}
+                />
+            )}
         </AdminLayout>
 
     );
@@ -113,7 +150,7 @@ const QuestionDisplay = ({ question }) => {
                 </div>
             ) : (
                 <div>
-                    <h3 className="text-lg font-semibold text-gray-800">Options:</h3>
+                    showDeleteModal<h3 className="text-lg font-semibold text-gray-800">Options:</h3>
                     <ul className="list-disc pl-5">
                         {(question.options || []).map((option, index) => (
                             <li key={index} className="text-gray-700">{option.text}</li>
@@ -122,6 +159,7 @@ const QuestionDisplay = ({ question }) => {
                 </div>
             )}
         </div>
+
     );
 };
 
@@ -145,6 +183,7 @@ const AnswerDisplay = ({ options, type }) => {
                     }
                 })}
             </ul>
+
         </div>
     );
 };

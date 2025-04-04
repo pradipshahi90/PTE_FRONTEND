@@ -113,13 +113,13 @@ export class GenericRepo {
             this.addAuthorizationHeader(headers);
 
             const response = await fetch(api, {
-                method: 'PATCH',
+                method: 'PUT',
                 headers: headers,
                 body: JSON.stringify(payload),
             });
 
             const data = await response.json();
-            data.status ? success(data.data) : failed(data.message || 'Something went wrong', data.errors);
+            data.status ? success(data) : failed(data.message || 'Something went wrong', data.errors);
         } catch (error) {
             failed(error.message, {});
         }

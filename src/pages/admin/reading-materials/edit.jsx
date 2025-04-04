@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AdminLayout from "../../../layouts/AdminLayout.jsx";
 import { GenericRepo } from "../../../repo/GenericRepo.js";
 import { Api } from "../../../utils/Api.js";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { useParams } from 'react-router-dom';
 
 const repo = new GenericRepo();
 
@@ -15,8 +16,10 @@ const questionTypes = [
     "reading-writing-fill-in-the-blank",
 ];
 
-export default function AddReadingMaterials() {
+export default function EditReadingMaterials() {
+
     const navigate = useNavigate();
+    const { slug } = useParams();
 
     const [formData, setFormData] = useState({
         title: "",
@@ -25,7 +28,7 @@ export default function AddReadingMaterials() {
         content: "",
         options: [{ text: "", isCorrect: false, order: 0 }],
         fileUrl: "",
-        isPremium: false, // New field
+        isPremium: false,
     });
 
     const handleChange = (e) => {
@@ -46,10 +49,7 @@ export default function AddReadingMaterials() {
     const addOption = () => {
         setFormData((prev) => ({
             ...prev,
-            options: [
-                ...prev.options,
-                { text: "", isCorrect: false, order: prev.options.length },
-            ],
+            options: [...prev.options, { text: "", isCorrect: false, order: prev.options.length }],
         }));
     };
 
@@ -60,18 +60,35 @@ export default function AddReadingMaterials() {
         }));
     };
 
+    const getReadingMaterial = () => {
+        repo.list(
+            `${Api.GET_READING_MATERIAL}/${slug}`,
+            "",
+            (data) => {
+                setFormData(data.readingMaterial);
+            },
+            (error) => {
+                console.log("Error fetching data:", error);
+            }
+        );
+    };
+
+    useEffect(() => {
+        getReadingMaterial(); // ✅ Runs only once when the component mounts
+    }, []);
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        repo.store(
-            Api.ADD_READING_MATERIAL,
+        repo.update(
+            `${Api.EDIT_READING_MATERIAL}/${formData.id}`,
             formData,
             (data) => {
-                console.log("data", data);
+                console.log('data', data);
                 toast.success(data.message);
                 navigate("/admin/reading-materials");
             },
             (error) => {
-                console.log("error", error);
+                console.log('error', error);
             }
         );
         console.log("Form Data Submitted:", formData);
@@ -80,7 +97,7 @@ export default function AddReadingMaterials() {
     return (
         <AdminLayout>
             <div className="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-lg">
-                <h2 className="text-xl font-semibold mb-4">Create a Question</h2>
+                <h2 className="text-xl font-semibold mb-4">Edit Question</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Title Input */}
                     <div>
@@ -193,28 +210,9 @@ export default function AddReadingMaterials() {
                         + Add Option
                     </button>
 
-                    {/*/!* File URL *!/*/}
-                    {/*<div>*/}
-                    {/*    <label htmlFor="fileUrl" className="block text-sm font-medium text-gray-700">File Upload</label>*/}
-                    {/*    <input*/}
-                    {/*        type="file"*/}
-                    {/*        name="fileUrl"*/}
-                    {/*        id="fileUrl"*/}
-                    {/*        onChange={(e) => {*/}
-                    {/*            const file = e.target.files[0];*/}
-                    {/*            if (file) {*/}
-                    {/*                setFormData((prev) => ({...prev, fileUrl: file}));*/}
-                    {/*            }*/}
-                    {/*        }}*/}
-                    {/*        className="w-full p-2 border rounded-md"*/}
-                    {/*    />*/}
-
-                    {/*</div>*/}
-
-                    {/* Is Premium Checkbox */}
+                    {/* Premium Checkbox */}
                     <div>
-                        <label className="inline-flex items-center text-lg font-semibold text-gray-700"
-                               htmlFor="isPremium">
+                        <label className="inline-flex items-center text-lg font-semibold text-gray-700" htmlFor="isPremium">
                             <input
                                 type="checkbox"
                                 id="isPremium"
@@ -232,10 +230,11 @@ export default function AddReadingMaterials() {
                         type="submit"
                         className="w-full bg-blue-500 text-white p-2 rounded-md cursor-pointer"
                     >
-                        Submit
+                        Update
                     </button>
                 </form>
             </div>
         </AdminLayout>
     );
+
 }

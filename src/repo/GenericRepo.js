@@ -1,25 +1,36 @@
 export class GenericRepo {
+    // Function to get the access token from the cookies
+    getAccessToken() {
+        const match = document.cookie.match(new RegExp('(^| )access_token=([^;]+)'));
+        return match ? match[2] : null;
+    }
+
+    // Method to add Authorization header with the token if it exists
+    addAuthorizationHeader(headers) {
+        const token = this.getAccessToken();
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+    }
+
     async list(api, filter, success, failed) {
         try {
             let url = api;
             if (filter) url += `?${filter}`;
+            const headers = {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+            };
+            this.addAuthorizationHeader(headers);
+
             const response = await fetch(url, {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/json',
-                },
+                headers: headers,
             });
 
             if (response.status === 401) {
                 return;
             }
-
-            if (!response.ok) {
-                failed('Something went wrong!');
-                return;
-            }
-
             const data = await response.json();
             data.status ? success(data) : failed(data.message || 'Something went wrong');
         } catch (error) {
@@ -29,12 +40,15 @@ export class GenericRepo {
 
     async details(api, success, failed) {
         try {
+            const headers = {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+            };
+            this.addAuthorizationHeader(headers);
+
             const response = await fetch(api, {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/json',
-                },
+                headers: headers,
             });
 
             if (!response.ok) {
@@ -51,12 +65,15 @@ export class GenericRepo {
 
     async store(api, payload, success, failed) {
         try {
+            const headers = {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            };
+            this.addAuthorizationHeader(headers);
+
             const response = await fetch(api, {
                 method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                },
+                headers: headers,
                 body: JSON.stringify(payload),
             });
 
@@ -69,11 +86,14 @@ export class GenericRepo {
 
     async storeForm(api, formData, success, failed) {
         try {
+            const headers = {
+                Accept: 'application/json',
+            };
+            this.addAuthorizationHeader(headers);
+
             const response = await fetch(api, {
                 method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                },
+                headers: headers,
                 body: formData,
             });
 
@@ -86,12 +106,15 @@ export class GenericRepo {
 
     async update(api, payload, success, failed) {
         try {
+            const headers = {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+            };
+            this.addAuthorizationHeader(headers);
+
             const response = await fetch(api, {
                 method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/json',
-                },
+                headers: headers,
                 body: JSON.stringify(payload),
             });
 
@@ -104,11 +127,14 @@ export class GenericRepo {
 
     async updateForm(api, formData, success, failed) {
         try {
+            const headers = {
+                Accept: 'application/json',
+            };
+            this.addAuthorizationHeader(headers);
+
             const response = await fetch(api, {
                 method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                },
+                headers: headers,
                 body: formData,
             });
 
@@ -121,11 +147,14 @@ export class GenericRepo {
 
     async destroy(api, success, failed) {
         try {
+            const headers = {
+                Accept: 'application/json',
+            };
+            this.addAuthorizationHeader(headers);
+
             const response = await fetch(api, {
                 method: 'DELETE',
-                headers: {
-                    Accept: 'application/json',
-                },
+                headers: headers,
             });
 
             const data = await response.json();

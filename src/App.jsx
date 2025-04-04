@@ -4,6 +4,9 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import toast, { Toaster } from 'react-hot-toast';
 import Home from "./pages/Home.jsx";
+import Dashboard from "./pages/admin/dashboard.jsx";
+import ReadingMaterials from "./pages/admin/ReadingMaterials.jsx";
+import AddReadingMaterial from "./pages/admin/reading-materials/add.jsx";
 
 const App = () => {
     return (
@@ -37,6 +40,10 @@ const App = () => {
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/admin/dashboard" element={<Dashboard />} />
+                <Route path="/admin/reading-materials" element={<ReadingMaterials />} />
+                <Route path="/admin/reading-materials/add" element={<AddReadingMaterial />} />
+
             </Routes>
         </Router>
     );

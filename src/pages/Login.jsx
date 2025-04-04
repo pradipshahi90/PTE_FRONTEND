@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import {Api} from "../utils/Api.js";
+import { Api } from "../utils/Api.js";
 import toast from "react-hot-toast";
-import {GenericRepo} from "../repo/GenericRepo.js";
+import { GenericRepo } from "../repo/GenericRepo.js";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
     const [formData, setFormData] = useState({
@@ -9,8 +10,8 @@ const Login = () => {
         password: ''
     });
 
+    const navigate = useNavigate(); // ✅ Call it at the top level
     const repo = new GenericRepo();
-
 
     // Handle input changes dynamically
     const handleChange = (e) => {
@@ -22,20 +23,30 @@ const Login = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
         repo.store(
             `${Api.LOGIN}`,
             formData,
-            (data)=>{
-                console.log('console.log',data);
-                toast.success(data.message);
+            (data) => {
+                console.log('console.log', data);
+                // Assuming you have the token in data.token
+                const token = data.token;
+                console.log('token', token);
 
+                // Set the cookie with the token
+                // Remove HttpOnly flag as it's not allowed in client-side JS
+                document.cookie = `access_token=${token}; path=/; max-age=3600; Secure; SameSite=Strict`;
+
+                toast.success(data.message);
+                navigate("/admin/dashboard");
             },
-            (error)=>{
+            (error) => {
                 toast.error(error);
-                console.log("error",error);
+                console.log("error", error);
             }
-        )
+        );
     };
+
     return (
         <div className="min-h-screen bg-background flex items-center justify-center">
             <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
@@ -74,8 +85,9 @@ const Login = () => {
                         Login
                     </button>
                 </form>
-                <p className="mt-4 text-[16px] font-[500]">Don't have an account? <a
-                    className="text-blue-400 cursor-pointer" href="/register">Sign up</a></p>
+                <p className="mt-4 text-[16px] font-[500]">
+                    Don't have an account? <a className="text-blue-400 cursor-pointer" href="/register">Sign up</a>
+                </p>
             </div>
         </div>
     );

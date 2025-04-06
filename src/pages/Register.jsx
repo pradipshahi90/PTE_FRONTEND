@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { GenericRepo } from "../repo/GenericRepo.js";
 import {Api} from "../utils/Api.js";
 import toast from 'react-hot-toast';
-
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -11,6 +11,7 @@ const Register = () => {
         password: ''
     });
     const repo = new GenericRepo();
+    const navigate = useNavigate(); // ✅ Call it at the top level
 
     const handleChange = (e) => {
         setFormData({
@@ -27,7 +28,7 @@ const Register = () => {
             (data)=>{
                 console.log('console.log',data);
                 toast.success(data.message);
-
+                navigate("/login");
             },
             (error)=>{
                 toast.error(error);

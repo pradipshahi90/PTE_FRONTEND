@@ -3,6 +3,7 @@ import { Api } from "../utils/Api.js";
 import toast from "react-hot-toast";
 import { GenericRepo } from "../repo/GenericRepo.js";
 import { useNavigate } from "react-router-dom";
+import {useAuthStore} from "../utils/authStore.js";
 
 const Login = () => {
     const [formData, setFormData] = useState({
@@ -23,7 +24,7 @@ const Login = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
+        const setUser = useAuthStore.getState().setUser;
         repo.store(
             `${Api.LOGIN}`,
             formData,
@@ -31,13 +32,15 @@ const Login = () => {
                 console.log('console.log', data);
                 // Assuming you have the token in data.token
                 const token = data.token;
-                console.log('token', token);
-
+                setUser(data.user);
                 // Set the cookie with the token
                 // Remove HttpOnly flag as it's not allowed in client-side JS
                 document.cookie = `access_token=${token}; path=/; max-age=3600; Secure; SameSite=Strict`;
 
                 toast.success(data.message);
+                if(data.user.role==="user"){
+                    navigate("/user/dashboard");
+                } else if(data.user.role==="admin")
                 navigate("/admin/dashboard");
             },
             (error) => {

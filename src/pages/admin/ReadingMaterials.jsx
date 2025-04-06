@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import { GenericRepo } from "../../repo/GenericRepo.js";
 import { Api } from "../../utils/Api.js";
 import AdminLayout from "../../layouts/AdminLayout.jsx";
@@ -11,6 +11,7 @@ const App = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [itemId, setItemId] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const debounceRef = useRef(null);
     let debounceTimer;
 
 
@@ -28,20 +29,18 @@ const App = () => {
         );
     };
 
-    const filterReadingMaterials = () => {
+    const filterReadingMaterials = (value) => {
         repo.list(
             `${Api.GET_READING_MATERIAL}/filter`,
-            searchTerm,
+            value,
             (data) => {
-                console.log('Fetched data:', data.readingMaterials);
-                setQuestions(data.readingMaterials); // ✅ Correct way to update state
+                setQuestions(data.readingMaterials);
             },
             (error) => {
                 console.log("Error fetching data:", error);
             }
         );
     };
-
     useEffect(() => {
         getReadingMaterials(); // ✅ Runs only once when the component mounts
     }, []);
@@ -84,27 +83,27 @@ const App = () => {
     };
 
 
-    const handleSearch = (e) => {
-        e.preventDefault();
-        const value = e.target.value;
-        console.log('e.target', value);
-        setSearchTerm(value);
 
-        // Call the debounced version of filterReadingMaterials
+    const handleSearch = (e) => {
+        const value = e.target.value;
+        setSearchTerm(value);
         debounceApiCall(value);
     };
 
-// Create a new debounced function for the API call
     const debounceApiCall = (value) => {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            if (value.length === 0) {
-                getReadingMaterials(); // Fetch all items when search term is empty
+        if (debounceRef.current) {
+            clearTimeout(debounceRef.current);
+        }
+
+        debounceRef.current = setTimeout(() => {
+            if (value.trim() === '') {
+                getReadingMaterials();
             } else {
-                filterReadingMaterials(value); // Filter items based on search term
+                filterReadingMaterials(value);
             }
         }, 300);
     };
+
 
     return (
         <AdminLayout>
@@ -173,7 +172,7 @@ const App = () => {
                             </div>
                         ))
                     ) : (
-                        <p className="text-center text-gray-500">Loading questions...</p>
+                        <p className="text-center text-gray-500">No Materials Found</p>
                     )}
                 </div>
             </div>

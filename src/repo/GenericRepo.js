@@ -16,7 +16,11 @@ export class GenericRepo {
     async list(api, filter, success, failed) {
         try {
             let url = api;
-            if (filter) url += `?${filter}`;
+            if (filter) {
+                const params = new URLSearchParams({ title: filter });
+                url += `?${params.toString()}`;
+            }
+
             const headers = {
                 'Content-Type': 'application/json',
                 Accept: 'application/json',
@@ -31,6 +35,7 @@ export class GenericRepo {
             if (response.status === 401) {
                 return;
             }
+
             const data = await response.json();
             data.status ? success(data) : failed(data.message || 'Something went wrong');
         } catch (error) {

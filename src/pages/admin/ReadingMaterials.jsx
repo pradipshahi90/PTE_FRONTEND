@@ -3,18 +3,35 @@ import { GenericRepo } from "../../repo/GenericRepo.js";
 import { Api } from "../../utils/Api.js";
 import AdminLayout from "../../layouts/AdminLayout.jsx";
 import DeleteConfirmation from "../../components/DeleteConfirmation.jsx";
+import { Search } from 'lucide-react';
 
 const App = () => {
     const repo = new GenericRepo();
     const [questions, setQuestions] = useState([]);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [itemId, setItemId] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    let debounceTimer;
 
 
     const getReadingMaterials = () => {
         repo.list(
             `${Api.GET_READING_MATERIAL}`,
             "",
+            (data) => {
+                console.log('Fetched data:', data.readingMaterials);
+                setQuestions(data.readingMaterials); // ✅ Correct way to update state
+            },
+            (error) => {
+                console.log("Error fetching data:", error);
+            }
+        );
+    };
+
+    const filterReadingMaterials = () => {
+        repo.list(
+            `${Api.GET_READING_MATERIAL}/filter`,
+            searchTerm,
             (data) => {
                 console.log('Fetched data:', data.readingMaterials);
                 setQuestions(data.readingMaterials); // ✅ Correct way to update state
@@ -66,59 +83,100 @@ const App = () => {
         setShowDeleteModal(false);
     };
 
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        const value = e.target.value;
+        console.log('e.target', value);
+        setSearchTerm(value);
+
+        // Call the debounced version of filterReadingMaterials
+        debounceApiCall(value);
+    };
+
+// Create a new debounced function for the API call
+    const debounceApiCall = (value) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            if (value.length === 0) {
+                getReadingMaterials(); // Fetch all items when search term is empty
+            } else {
+                filterReadingMaterials(value); // Filter items based on search term
+            }
+        }, 300);
+    };
+
     return (
         <AdminLayout>
 
-        <div className="container mx-auto p-6">
-            <h1 className="text-4xl font-bold text-center text-blue-600 mb-8">Reading Materials</h1>
-            <div className="flex mb-4 justify-end">
-                <a href="/admin/reading-materials/add" className='bg-blue-500 text-white px-4 py-2 rounded-lg'>+ Add new</a>
+            <div className="container mx-auto p-6">
+                <h1 className="text-4xl font-bold text-center text-blue-600 mb-8">Reading Materials</h1>
+                <div className="flex mb-6 justify-between gap-6 items-center">
+                    <div className="relative w-90">
+                        <input
+                            type="text"
+                            placeholder="Search by title..."
+                            value={searchTerm}
+                            onChange={handleSearch}
+                            className="w-full px-4 py-3 pl-12 rounded-xl shadow-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-gray-700 placeholder-gray-400"
+                        />
+                        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20}/>
+                        <button
+                            type="submit"
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-500 text-white px-3 py-1.5 rounded-lg hover:bg-blue-600 transition-all text-sm"
+                        >
+                            Search
+                        </button>
+                    </div>
+                    <a href="/admin/reading-materials/add" className='bg-blue-500 text-white px-4 py-2 rounded-lg'>+ Add
+                        new</a>
 
-            </div>
+                </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {questions.length > 0 ? (
-                    questions.map((question) => (
-                        <div key={question.id} className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300">
-                            <h2 className="text-xl font-semibold text-gray-800">{question.title}</h2>
-                            <p className="text-gray-600 mt-2">{question.content}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {questions.length > 0 ? (
+                        questions.map((question) => (
+                            <div key={question.id}
+                                 className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300">
+                                <h2 className="text-xl font-semibold text-gray-800">{question.title}</h2>
+                                <p className="text-gray-600 mt-2">{question.content}</p>
 
-                            {/* Display options */}
-                            <QuestionDisplay question={question}/>
+                                {/* Display options */}
+                                <QuestionDisplay question={question}/>
 
-                            {/* Show Answer Button */}
-                            <div className="flex justify-between items-center mt-4">
-                                <button
-                                    onClick={() => toggleAnswer(question.id)}
-                                    className="bg-blue-500 text-white py-1 px-4 rounded-lg hover:bg-blue-600 transition-all duration-300"
-                                >
-                                    {question.showAnswer ? "Hide Answer" : "Show Answer"}
-                                </button>
+                                {/* Show Answer Button */}
+                                <div className="flex justify-between items-center mt-4">
+                                    <button
+                                        onClick={() => toggleAnswer(question.id)}
+                                        className="bg-blue-500 text-white py-1 px-4 rounded-lg hover:bg-blue-600 transition-all duration-300"
+                                    >
+                                        {question.showAnswer ? "Hide Answer" : "Show Answer"}
+                                    </button>
+                                </div>
+
+                                {/* Show the answers if the button is clicked */}
+                                {question.showAnswer && <AnswerDisplay options={question.options || []} type={question.type} />}
+
+                                {/* Edit/Delete Buttons */}
+                                <div className="flex justify-between items-center mt-4">
+                                    <a href={`/admin/reading-materials/edit/${question.slug}`}
+                                       className="bg-yellow-500 text-white py-1 px-4 rounded-lg hover:bg-yellow-600 transition-all duration-300"
+                                    >
+                                        Edit
+                                    </a>
+                                    <button onClick={() => openDeleteModal(question.id)}
+                                            className="bg-red-500 text-white py-1 px-4 cursor-pointer rounded-lg hover:bg-red-600 transition-all duration-300"
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
                             </div>
-
-                            {/* Show the answers if the button is clicked */}
-                            {question.showAnswer && <AnswerDisplay options={question.options || []} type={question.type} />}
-
-                            {/* Edit/Delete Buttons */}
-                            <div className="flex justify-between items-center mt-4">
-                                <a href={`/admin/reading-materials/edit/${question.slug}`}
-                                    className="bg-yellow-500 text-white py-1 px-4 rounded-lg hover:bg-yellow-600 transition-all duration-300"
-                                >
-                                    Edit
-                                </a>
-                                <button onClick={() => openDeleteModal(question.id)}
-                                        className="bg-red-500 text-white py-1 px-4 cursor-pointer rounded-lg hover:bg-red-600 transition-all duration-300"
-                                >
-                                    Delete
-                                </button>
-                            </div>
-                        </div>
-                    ))
-                ) : (
-                    <p className="text-center text-gray-500">Loading questions...</p>
-                )}
+                        ))
+                    ) : (
+                        <p className="text-center text-gray-500">Loading questions...</p>
+                    )}
+                </div>
             </div>
-        </div>
             {showDeleteModal && (
                 <DeleteConfirmation
                     id={itemId}

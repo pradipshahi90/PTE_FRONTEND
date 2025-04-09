@@ -9,6 +9,7 @@ import ReadingMaterials from "./pages/admin/ReadingMaterials.jsx";
 import AddReadingMaterial from "./pages/admin/reading-materials/add.jsx";
 import EditReadingMaterials from "./pages/admin/reading-materials/edit.jsx";
 import UserDashboard from "./pages/user/dashboard.jsx";
+import Learn from "./pages/learn.jsx";
 
 const App = () => {
     return (
@@ -48,6 +49,7 @@ const App = () => {
                 <Route path="/admin/reading-materials/edit/:slug" element={<EditReadingMaterials />} />
 
                 <Route path="/user/dashboard" element={<UserDashboard />} />
+                <Route path="/learn" element={<Learn />} />
 
             </Routes>
         </Router>

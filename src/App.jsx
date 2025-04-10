@@ -10,6 +10,8 @@ import AddReadingMaterial from "./pages/admin/reading-materials/add.jsx";
 import EditReadingMaterials from "./pages/admin/reading-materials/edit.jsx";
 import UserDashboard from "./pages/user/dashboard.jsx";
 import Learn from "./pages/learn.jsx";
+import UserManagementPage from "./pages/admin/UserManagementPage.jsx";
+import CreateUserPage from "./components/CreateUserPage.jsx";
 
 const App = () => {
     return (
@@ -50,6 +52,11 @@ const App = () => {
 
                 <Route path="/user/dashboard" element={<UserDashboard />} />
                 <Route path="/learn" element={<Learn />} />
+
+
+                <Route path="/admin/users" element={<UserManagementPage />} />
+                <Route path="/admin/users/create-user" element={<CreateUserPage />} />
+
 
             </Routes>
         </Router>

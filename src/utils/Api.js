@@ -10,5 +10,9 @@ export class Api {
     static DELETE_READING_MATERIAL = `${Api.BASE_URL}/reading-materials`;
     static EDIT_READING_MATERIAL = `${Api.BASE_URL}/reading-materials`;
 
+    static GET_USERS = `${Api.BASE_URL}/admin/users`;
+    static UPDATE_USER_STATUS = `${Api.BASE_URL}/admin/users`;
+
+
 
 }

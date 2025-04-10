@@ -117,14 +117,31 @@ export class GenericRepo {
             };
             this.addAuthorizationHeader(headers);
 
+            // Only include body if the payload is not empty
+            const requestBody = Object.keys(payload).length ? JSON.stringify(payload) : null;
+
             const response = await fetch(api, {
                 method: 'PUT',
                 headers: headers,
-                body: JSON.stringify(payload),
+                body: requestBody,  // Send body only if payload is not empty
             });
 
             const data = await response.json();
-            data.status ? success(data) : failed(data.message || 'Something went wrong', data.errors);
+
+            if (data.status) {
+                // If data has empty fields, exclude them from the response
+                const filteredData = {};
+
+                Object.keys(data).forEach((key) => {
+                    if (data[key] !== undefined && data[key] !== null) {
+                        filteredData[key] = data[key];
+                    }
+                });
+
+                success(filteredData);  // Pass filtered data to success callback
+            } else {
+                failed(data.message || 'Something went wrong', data.errors);
+            }
         } catch (error) {
             failed(error.message, {});
         }

@@ -12,6 +12,9 @@ import UserDashboard from "./pages/user/dashboard.jsx";
 import Learn from "./pages/learn.jsx";
 import UserManagementPage from "./pages/admin/UserManagementPage.jsx";
 import CreateUserPage from "./components/CreateUserPage.jsx";
+import PaymentButton from "./pages/payment.jsx";
+import PaymentSuccess from "./pages/payment/success.jsx";
+import PaymentFailure from "./pages/payment/fail.jsx";
 
 const App = () => {
     return (
@@ -56,6 +59,9 @@ const App = () => {
 
                 <Route path="/admin/users" element={<UserManagementPage />} />
                 <Route path="/admin/users/create-user" element={<CreateUserPage />} />
+                <Route path="/payment" element={<PaymentButton />} />
+                <Route path="/payment/success" element={<PaymentSuccess />} />
+                <Route path="/payment/failure" element={<PaymentFailure />} />
 
 
             </Routes>

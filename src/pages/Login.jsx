@@ -39,7 +39,7 @@ const Login = () => {
 
                 toast.success(data.message);
                 if(data.user.role==="user"){
-                    navigate("/user/dashboard");
+                    navigate("/");
                 } else if(data.user.role==="admin")
                 navigate("/admin/dashboard");
             },

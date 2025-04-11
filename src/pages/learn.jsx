@@ -7,6 +7,7 @@ import { useAuthStore } from "../utils/authStore.js";
 import { Lock } from "lucide-react";
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
+import PaymentModal from "../components/PaymentModal.jsx";
 
 const Learn = () => {
     const navigate = useNavigate();
@@ -15,6 +16,9 @@ const Learn = () => {
     const [userAnswers, setUserAnswers] = useState({});
     const [reorderInputs, setReorderInputs] = useState({});
     const [results, setResults] = useState({});
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const currentUser = useAuthStore.getState().user;
+
 
     const getReadingMaterials = () => {
         repo.list(
@@ -58,6 +62,10 @@ const Learn = () => {
     };
 
     const checkAnswer = (material) => {
+        if(!currentUser){
+            toast.error("Please login first");
+            return;
+        }
         let isCorrect = false;
 
         if (material.type === "reorder") {
@@ -93,26 +101,55 @@ const Learn = () => {
         getReadingMaterials();
     }, []);
 
+
+
     const renderQuestion = (material) => {
-        if (material.isPremium) {
-            return (
-                <div className="relative" key={material.id}>
-                    <div className="absolute inset-0 bg-gray-100 bg-opacity-70 backdrop-blur-md flex items-center justify-center z-10 rounded-lg">
-                        <div className="flex flex-col items-center">
+        const isLoggedIn = !!currentUser;
+        const isPremiumLocked = material.isPremium && (!isLoggedIn || !currentUser.is_premium_purchased);
+
+        const handleLockedClick = () => {
+            if (!isLoggedIn) {
+                console.log('here');
+                toast.error("Please login first");
+            } else {
+                console.log('haha');
+                setShowPaymentModal(true);
+            }
+        };
+
+        return (
+            <div className="relative" key={material.id}>
+                {material.isPremium && isPremiumLocked && (
+                    <div
+                        className="absolute inset-0 bg-gray-100 bg-opacity-70 backdrop-blur-md flex items-center justify-center z-10 rounded-lg cursor-pointer"
+                        onClick={handleLockedClick}
+                    >
+                        <div className="flex flex-col items-center pointer-events-none">
                             <Lock className="w-12 h-12 text-gray-500 mb-2" />
                             <p className="text-gray-700 font-semibold">Premium Content</p>
-                            <button className="mt-3 px-4 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition">
-                                Upgrade to Access
-                            </button>
+                            {isLoggedIn && (
+                                <button
+                                    className="mt-3 px-4 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition pointer-events-auto"
+                                >
+                                    Upgrade to Access
+                                </button>
+                            )}
                         </div>
                     </div>
+                )}
+
+                {/* Disable interaction when locked */}
+                <div  className={isPremiumLocked ? 'pointer-events-none select-none' : ''}>
                     {renderQuestionContent(material)}
                 </div>
-            );
-        }
 
-        return renderQuestionContent(material);
+                {showPaymentModal && (
+                    <PaymentModal isOpen={showPaymentModal} onClose={() => setShowPaymentModal(false)} />
+                )}
+            </div>
+        );
     };
+
 
     const renderQuestionContent = (material) => {
         return (
@@ -168,7 +205,7 @@ const Learn = () => {
                         </div>
                         <button
                             onClick={() => !material.isPremium && checkAnswer(material)}
-                            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+                            className="mt-4 cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
                             disabled={!userAnswers[material.id]}
                         >
                             Check Answer

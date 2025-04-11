@@ -4,6 +4,8 @@ import { Api } from "../../utils/Api.js";
 import { GenericRepo } from "../../repo/GenericRepo.js";
 import AdminLayout from "../../layouts/AdminLayout.jsx";
 import { Edit2, Trash2, ToggleLeft, ToggleRight, User, Search, Plus } from "lucide-react";
+import toast from "react-hot-toast";
+import DeleteConfirmation from "../../components/DeleteConfirmation.jsx";
 
 const UserManagementPage = () => {
     const repo = new GenericRepo();
@@ -12,6 +14,15 @@ const UserManagementPage = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        role: 'user',
+        password: '',
+    });
+    const [showDeleteModal,setShowDeleteModal] = useState(false);
+
+
 
     useEffect(() => {
         fetchUsers();
@@ -46,23 +57,114 @@ const UserManagementPage = () => {
             )
         }
 
-    // Delete user
-    const deleteUser = async (userId) => {
-        if (window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
-            try {
-                await axios.delete(`http://localhost:5001/api/admin/users/${userId}`);
+    const handleAddUser = () => {
+        const newUser = {
+            name: formData.name,
+            email: formData.email,
+            role: formData.role,
+            password: formData.password,
+        };
+        console.log('new user',newUser);
+        repo.store(
+            Api.ADD_USER,
+                newUser,
+            (data)=>{
+                console.log('data',data);
                 fetchUsers();
-            } catch (err) {
-                setError('Error deleting user');
+                toast.success(data.message);
+                setIsModalOpen(false);
+            },
+            (error)=>{
+                console.log('error',error);
+                toast.error(error);
             }
-        }
+        )
     };
 
-    // Edit user
-    const editUser = (user) => {
-        setSelectedUser(user);
+    const handleEditUser = () => {
+        // Do validation if needed
+        console.log('selectedUser',selectedUser);
+        const newUser = {
+            name: formData.name,
+            email: formData.email,
+            role: formData.role,
+            password: formData.password,
+        };
+        repo.update(
+            `${Api.EDIT_USER}/${selectedUser.id}`,
+            newUser,
+            (data)=>{
+                console.log('data',data);
+                fetchUsers();
+                setIsModalOpen(false);
+                toast.success(data.message);
+            },
+            (error)=>{
+                console.log('error',error);
+                toast.error(error);
+            }
+        )
+    };
+
+    const closeDeleteModal =()=>{
+        setShowDeleteModal(false);
+    }
+
+
+    const handleAddButtonClick = () => {
+        setSelectedUser(null);
+        setFormData({
+            name: '',
+            email: '',
+            role: 'user',
+            password: '',
+        });
         setIsModalOpen(true);
     };
+
+
+
+    // Delete user
+    const deleteUser = async (user) => {
+setSelectedUser(user);
+setShowDeleteModal(true);
+    };
+
+    const handleDelete = (id) => {
+        repo.destroy(
+            `${Api.DELETE_USER}/${selectedUser.id}`,
+            id,
+            (data) => {
+                setShowDeleteModal(false);
+                fetchUsers();
+                // Safely check if status is strictly true
+                if (data.status !== true) {
+                    toast.success(data.message || 'User Deleted Successfully');
+                    return;
+                }
+                console.log('data.message', data.message);
+                toast.success(data.message || 'User deleted successfully');
+            },
+            (error) => {
+                console.log('error', error);
+                toast.error(error?.message || 'An error occurred while deleting the user');
+            }
+        );
+    };
+
+    const editUser = (user) => {
+        setSelectedUser(user);
+        console.log('user',user);
+        setFormData({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            password: '', // Leave empty; no password update unless entered
+        });
+        setIsModalOpen(true);
+    };
+
 
     // Filter users based on search term
     const filteredUsers = users.filter(user =>
@@ -84,8 +186,7 @@ const UserManagementPage = () => {
                             <button
                                 className="flex items-center bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors duration-200"
                                 onClick={() => {
-                                    setSelectedUser(null);
-                                    setIsModalOpen(true);
+                                    handleAddButtonClick();
                                 }}
                             >
                                 <Plus size={18} className="mr-2" />
@@ -137,7 +238,7 @@ const UserManagementPage = () => {
                                     <tbody className="bg-white divide-y divide-gray-200">
                                     {filteredUsers.length > 0 ? (
                                         filteredUsers.map((user) => (
-                                            <tr key={user._id} className="hover:bg-gray-50">
+                                            <tr key={user.id} className="hover:bg-gray-50">
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="flex items-center">
                                                         <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center">
@@ -166,7 +267,7 @@ const UserManagementPage = () => {
                                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                     <div className="flex justify-end space-x-2">
                                                         <button
-                                                            onClick={() => toggleUserStatus(user._id)}
+                                                            onClick={() => toggleUserStatus(user.id)}
                                                             className={`transition-colors duration-200 p-2 rounded-full ${
                                                                 user.active
                                                                     ? 'bg-green-50 text-green-600 hover:bg-green-100 '
@@ -184,7 +285,7 @@ const UserManagementPage = () => {
                                                             <Edit2 size={18} />
                                                         </button>
                                                         <button
-                                                            onClick={() => deleteUser(user._id)}
+                                                            onClick={() => deleteUser(user)}
                                                             className="bg-red-50 text-red-600 hover:bg-red-100 p-2 rounded-full transition-colors duration-200"
                                                             title="Delete User"
                                                         >
@@ -209,9 +310,9 @@ const UserManagementPage = () => {
 
                 {/* Edit/Add User Modal */}
                 {isModalOpen && (
-                    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+                    <div className="fixed inset-0 bg-[rgba(0,0,0,0.5)] flex items-center justify-center z-50">
                         <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-                            <div className="p-6">
+                        <div className="p-6">
                                 <h3 className="text-lg font-medium text-gray-900 mb-4">
                                     {selectedUser ? 'Edit User' : 'Add New User'}
                                 </h3>
@@ -223,7 +324,8 @@ const UserManagementPage = () => {
                                         <input
                                             type="text"
                                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                                            defaultValue={selectedUser?.name || ''}
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         />
                                     </div>
                                     <div>
@@ -233,8 +335,8 @@ const UserManagementPage = () => {
                                         <input
                                             type="email"
                                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                                            defaultValue={selectedUser?.email || ''}
-                                        />
+                                            value={formData.email}
+                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}                                        />
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700">
@@ -242,11 +344,11 @@ const UserManagementPage = () => {
                                         </label>
                                         <select
                                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                                            defaultValue={selectedUser?.role || 'user'}
+                                            value={formData.role}
+                                            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                                         >
                                             <option value="admin">Admin</option>
                                             <option value="user">User</option>
-                                            <option value="editor">Editor</option>
                                         </select>
                                     </div>
                                     {!selectedUser && (
@@ -257,6 +359,8 @@ const UserManagementPage = () => {
                                             <input
                                                 type="password"
                                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                                                value={formData.password}
+                                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                             />
                                         </div>
                                     )}
@@ -273,14 +377,23 @@ const UserManagementPage = () => {
                                 <button
                                     type="button"
                                     className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
+                                    onClick={selectedUser ? handleEditUser : handleAddUser}
                                 >
                                     {selectedUser ? 'Save Changes' : 'Add User'}
                                 </button>
+
                             </div>
                         </div>
                     </div>
                 )}
             </div>
+            {showDeleteModal && (
+                <DeleteConfirmation
+                    id={selectedUser.id}
+                    onDelete={handleDelete}
+                    onClose={closeDeleteModal}
+                />
+            )}
         </AdminLayout>
     );
 };

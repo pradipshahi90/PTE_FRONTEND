@@ -12,6 +12,9 @@ export class Api {
 
     static GET_USERS = `${Api.BASE_URL}/admin/users`;
     static UPDATE_USER_STATUS = `${Api.BASE_URL}/admin/users`;
+    static ADD_USER = `${Api.BASE_URL}/admin/users`;
+    static EDIT_USER = `${Api.BASE_URL}/admin/users`;
+    static DELETE_USER = `${Api.BASE_URL}/admin/users`;
 
 
 

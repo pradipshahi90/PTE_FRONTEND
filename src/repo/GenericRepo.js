@@ -180,7 +180,7 @@ export class GenericRepo {
             });
 
             const data = await response.json();
-            data.status ? success(data.message || 'Successfully deleted!') : failed(data.message || 'Something went wrong');
+            data.status ? success(data.message || 'Successfully deleted!') : failed(data || 'Something went wrong');
         } catch (error) {
             failed(error.message);
         }

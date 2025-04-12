@@ -12,7 +12,7 @@ const navItems = [
     { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
     { label: 'Users', href: '/admin/users', icon: Users },
     { label: 'Reading Materials', href: '/admin/reading-materials', icon: BookOpen },
-    { label: 'Settings', href: '/admin/settings', icon: Settings },
+    { label: 'Payment History', href: '/admin/payment-history', icon: Settings },
 ];
 
 export default function AdminSidebar() {

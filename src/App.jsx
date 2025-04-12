@@ -15,6 +15,7 @@ import CreateUserPage from "./components/CreateUserPage.jsx";
 import PaymentButton from "./pages/payment.jsx";
 import PaymentSuccess from "./pages/payment/success.jsx";
 import PaymentFailure from "./pages/payment/fail.jsx";
+import PaymentHistory from "./pages/admin/payment-history.jsx";
 
 const App = () => {
     return (
@@ -62,6 +63,7 @@ const App = () => {
                 <Route path="/payment" element={<PaymentButton />} />
                 <Route path="/payment/success" element={<PaymentSuccess />} />
                 <Route path="/payment/failure" element={<PaymentFailure />} />
+                <Route path="/admin/payment-history" element={<PaymentHistory />} />
 
 
             </Routes>

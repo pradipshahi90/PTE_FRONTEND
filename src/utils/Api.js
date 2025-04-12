@@ -16,6 +16,5 @@ export class Api {
     static EDIT_USER = `${Api.BASE_URL}/admin/users`;
     static DELETE_USER = `${Api.BASE_URL}/admin/users`;
 
-
-
+    static GET_PAYMENT_HISTORY = `${Api.BASE_URL}/payment/history`;
 }

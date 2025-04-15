@@ -16,6 +16,11 @@ import PaymentButton from "./pages/payment.jsx";
 import PaymentSuccess from "./pages/payment/success.jsx";
 import PaymentFailure from "./pages/payment/fail.jsx";
 import PaymentHistory from "./pages/admin/payment-history.jsx";
+import ExamCreator from "./pages/admin/create-exam.jsx";
+import ExamQuestions from "./pages/admin/exam-questions.jsx";
+import PteCreateForm from "./pages/admin/create-exam.jsx";
+import ExamSelectionPage from "./pages/ExamList.jsx";
+import ExamRoom from "./pages/give-exam.jsx";
 
 const App = () => {
     return (
@@ -64,7 +69,10 @@ const App = () => {
                 <Route path="/payment/success" element={<PaymentSuccess />} />
                 <Route path="/payment/failure" element={<PaymentFailure />} />
                 <Route path="/admin/payment-history" element={<PaymentHistory />} />
-
+                <Route path="/admin/create-exam" element={<PteCreateForm />} />
+            <Route path="/admin/exam-question" element={<ExamQuestions />} />
+<Route path="/exam" element={<ExamSelectionPage />} />
+                <Route path="/exam-room" element={<ExamRoom />} />
 
             </Routes>
         </Router>

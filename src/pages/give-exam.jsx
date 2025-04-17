@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Clock, ChevronRight, ChevronLeft, CheckCircle, AlertCircle, Volume2 } from 'lucide-react';
 import axios from 'axios';
+import {useNavigate} from "react-router-dom";
 
 const API_BASE_URL = 'http://localhost:5001/api';
 
@@ -16,6 +17,8 @@ export default function ExamInterface() {
     const [answers, setAnswers] = useState({});
     const [score, setScore] = useState(null);
     const [showResults, setShowResults] = useState(false);
+    const navigate = useNavigate(); // ✅ Call it at the top level
+
 
     // Load exam data from localStorage
     useEffect(() => {
@@ -244,13 +247,81 @@ export default function ExamInterface() {
         // Calculate score
         const finalScore = calculateScore();
         setScore(finalScore);
-        setShowResults(true);
 
-        // In a real app, we would send answers to a server here
-        console.log("Exam submitted with answers:", answers);
+        // Create a structured object with all exam data
+        const examResults = {
+            examId: exam?._id,
+            examTitle: exam?.title,
+            submittedAt: new Date().toISOString(),
+            score: finalScore,
+            questionsWithAnswers: questions.map(question => {
+                const answer = answers[question._id];
+
+                let formattedAnswer = null;
+                let isCorrect = null;
+
+                if (question.category === 'multiple-choice') {
+                    const selectedOption = question.options.find(opt => opt._id === answer);
+                    console.log('selectedOption',selectedOption);
+                    formattedAnswer = selectedOption ? {
+                        optionId: selectedOption._id,
+                        text: selectedOption.text
+                    } : null;
+                    isCorrect = selectedOption && selectedOption.isCorrect;
+                }
+                else if (question.category === 'fill-in-blanks') {
+                    formattedAnswer = answer || null;
+
+                    // Calculate how many blanks were answered correctly
+                    if (answer) {
+                        let correctCount = 0;
+                        let totalBlanks = Object.keys(question.correctAnswer).length;
+
+                        for (const [key, correctValue] of Object.entries(question.correctAnswer)) {
+                            const userValue = answer[key]?.toLowerCase().trim();
+                            if (userValue === correctValue.toLowerCase().trim()) {
+                                correctCount++;
+                            }
+                        }
+
+                        isCorrect = correctCount === totalBlanks ? true :
+                            correctCount > 0 ? 'partial' : false;
+                    }
+                }
+                else if (question.category === 'essay' || question.category === 'summarize-text') {
+                    formattedAnswer = answer || null;
+                    isCorrect = 'manual-grading';
+                }
+                else {
+                    formattedAnswer = answer || null;
+                }
+
+                return {
+                    questionId: question._id,
+                    category: question.category,
+                    questionText: question.questionText || question.text,
+                    maxScore: question.maxScore,
+                    userAnswer: formattedAnswer,
+                    correctAnswer: question.category === 'multiple-choice' ?
+                        question.options.filter(opt => opt.isCorrect).map(opt => ({ optionId: opt._id, text: opt.text })) :
+                        question.correctAnswer,
+                    isCorrect: isCorrect
+                };
+            })
+        };
+
+        // Store in localStorage
+        localStorage.setItem('lastExamResults', JSON.stringify(examResults));
+
+        // Also log to console for debugging
+        console.log("Exam results stored in localStorage:", examResults);
         console.log("Final score:", finalScore);
     };
 
+    const handleFinishAndGoToSpeaking = () => {
+        handleSubmit(); // Submit the current exam
+        navigate('/exam/speaking-test'); // Navigate to speaking test
+    };
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -438,46 +509,6 @@ export default function ExamInterface() {
 
             {/* Main content */}
             <main className="container mx-auto py-8 px-4">
-                {showResults ? (
-                    <div className="bg-white rounded-xl shadow-lg p-8 max-w-2xl mx-auto">
-                        <div className="text-center mb-6">
-                            <CheckCircle className="w-16 h-16 mx-auto text-green-500 mb-4" />
-                            <h2 className="text-2xl font-bold mb-2">Exam Completed!</h2>
-                            <p className="text-lg text-gray-600">
-                                Your answers have been recorded for {exam.title}.
-                            </p>
-                        </div>
-
-                        <div className="p-6 bg-indigo-50 rounded-lg mb-6">
-                            <h3 className="text-xl font-bold text-center mb-4">Your Results</h3>
-                            <div className="flex justify-between items-center mb-2">
-                                <span className="text-gray-700">Score:</span>
-                                <span className="font-bold text-lg">{score.score} / {score.possibleScore}</span>
-                            </div>
-                            <div className="flex justify-between items-center mb-4">
-                                <span className="text-gray-700">Percentage:</span>
-                                <span className="font-bold text-lg">{score.percentage}%</span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-4">
-                                <div
-                                    className={`h-4 rounded-full ${
-                                        score.percentage >= 70 ? 'bg-green-600' :
-                                            score.percentage >= 50 ? 'bg-yellow-500' :
-                                                'bg-red-500'
-                                    }`}
-                                    style={{ width: `${score.percentage}%` }}
-                                ></div>
-                            </div>
-                        </div>
-
-                        <button
-                            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium"
-                            onClick={() => window.location.href = '/dashboard'}
-                        >
-                            Return to Dashboard
-                        </button>
-                    </div>
-                ) : (
                     <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                         {/* Section and question title */}
                         <div className="bg-gray-50 border-b p-6">
@@ -526,28 +557,35 @@ export default function ExamInterface() {
                                 <ChevronLeft className="w-5 h-5 mr-1" />
                                 Previous
                             </button>
-
                             <button
-                                onClick={handleNextQuestion}
-                                disabled={
+                                onClick={
                                     (currentSectionIndex === exam.sections.length - 1 &&
                                         currentQuestionIndex === currentSection.questions.length - 1) ||
                                     examCompleted
+                                        ? handleFinishAndGoToSpeaking
+                                        : handleNextQuestion
                                 }
-                                className={`flex items-center px-4 py-2 rounded-md font-medium ${
-                                    (currentSectionIndex === exam.sections.length - 1 &&
-                                        currentQuestionIndex === currentSection.questions.length - 1) ||
-                                    examCompleted
-                                        ? 'text-gray-400 cursor-not-allowed'
-                                        : 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                                }`}
+                                className="flex items-center px-4 py-2 rounded-md font-medium bg-indigo-600 hover:bg-indigo-700 text-white"
                             >
-                                Next
-                                <ChevronRight className="w-5 h-5 ml-1" />
+                                {(currentSectionIndex === exam.sections.length - 1 &&
+                                    currentQuestionIndex === currentSection.questions.length - 1) ||
+                                examCompleted
+                                    ? (
+                                        <>
+                                            Move to Speaking Test
+                                            <ChevronRight className="w-5 h-5 ml-1" />
+                                        </>
+                                    )
+                                    : (
+                                        <>
+                                            Next
+                                            <ChevronRight className="w-5 h-5 ml-1" />
+                                        </>
+                                    )
+                                }
                             </button>
                         </div>
                     </div>
-                )}
             </main>
         </div>
     );

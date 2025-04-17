@@ -13,6 +13,10 @@ const navItems = [
     { label: 'Users', href: '/admin/users', icon: Users },
     { label: 'Reading Materials', href: '/admin/reading-materials', icon: BookOpen },
     { label: 'Payment History', href: '/admin/payment-history', icon: Settings },
+    { label: 'Create Exam', href: '/admin/create-exam', icon: Settings },
+    { label: 'Exams List', href: '/admin/exam-question', icon: Settings },
+    { label: 'Speaking Questions', href: '/admin/speakingQuestions', icon: Settings },
+
 ];
 
 export default function AdminSidebar() {

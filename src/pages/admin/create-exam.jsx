@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import AdminLayout from "../../layouts/AdminLayout.jsx";
+import toast from "react-hot-toast";
 
 const API_BASE_URL = 'http://localhost:5001/api';
 
@@ -292,7 +293,7 @@ const CreateExamForm = () => {
                 throw new Error(result.message || 'Failed to create exam');
             }
 
-            alert('Exam created successfully!');
+            toast.success("Exam created successfully");
 
             // Reset form or redirect
             setExamData({

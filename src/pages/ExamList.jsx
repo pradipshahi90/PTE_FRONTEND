@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ArrowDown, ArrowRight, BookOpen, Clock, Award } from 'lucide-react';
+import PaymentModal from "../components/PaymentModal.jsx";
+import {useAuthStore} from "../utils/authStore.js";
+import toast from "react-hot-toast";
+import Header from "../components/Header.jsx";
 
 const API_BASE_URL = 'http://localhost:5001/api';
 
@@ -12,6 +16,9 @@ const ExamSelectionPage = () => {
     const [expandedExam, setExpandedExam] = useState(null);
     const [startExam, setStartExam] = useState(false);
     const [currentExam, setCurrentExam] = useState(null);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const currentUser = useAuthStore.getState().user;
+
 
     useEffect(() => {
         handleFetchExams();
@@ -57,10 +64,24 @@ const ExamSelectionPage = () => {
     };
 
     const handleStartExam = (exam) => {
+        const isLoggedIn = !!currentUser;
+
+        if (!isLoggedIn) {
+            toast.error("Please log in to start the exam.");
+            return;
+        }
+
+        if (!currentUser.is_premium_purchased) {
+            setShowPaymentModal(true);
+            return;
+        }
+
+        // User is logged in and has premium
         setCurrentExam(exam);
         localStorage.setItem("selectedExam", JSON.stringify(exam));
         setStartExam(true);
     };
+
 
     const calculateTotalDuration = (sections) => {
         return sections.reduce((total, section) => total + section.duration, 0);
@@ -83,7 +104,8 @@ const ExamSelectionPage = () => {
     }
 
     return (
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
+            <div className=" container mx-auto ">
+                <Header />
             <h1 className="text-3xl font-bold text-center mb-8 text-blue-800">Exam Selection</h1>
 
             <div className="mb-6 bg-blue-50 p-4 rounded-lg shadow-sm">
@@ -180,6 +202,9 @@ const ExamSelectionPage = () => {
                     ))
                 )}
             </div>
+            {showPaymentModal && (
+                <PaymentModal isOpen={showPaymentModal} onClose={() => setShowPaymentModal(false)} />
+            )}
         </div>
     );
 };
@@ -187,8 +212,9 @@ const ExamSelectionPage = () => {
 // This would be a separate component for taking the exam
 const ExamTaking = ({ exam, questions, onBack }) => {
     return (
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
-            <div className="flex justify-between items-center mb-6">
+        <div className=" container mx-auto ">
+            <Header />
+            <div className="flex justify-between items-center mb-6 mt-4">
                 <h1 className="text-2xl font-bold text-blue-800">{exam.title}</h1>
                 <button
                     onClick={onBack}
@@ -224,7 +250,8 @@ const ExamTaking = ({ exam, questions, onBack }) => {
                 </div>
 
                 <div className="mt-8 flex justify-center">
-                    <a href="/exam-room" className="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-8 rounded-md transition-colors text-lg">
+                    <a href="/exam-room"
+                       className="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-8 rounded-md transition-colors text-lg">
                         Begin Exam
                     </a>
                 </div>

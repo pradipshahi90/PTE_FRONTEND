@@ -109,7 +109,6 @@ const Learn = () => {
 
         const handleLockedClick = () => {
             if (!isLoggedIn) {
-                console.log('here');
                 toast.error("Please login first");
             } else {
                 console.log('haha');
@@ -205,7 +204,7 @@ const Learn = () => {
                         </div>
                         <button
                             onClick={() => !material.isPremium && checkAnswer(material)}
-                            className="mt-4 cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+                            className="mt-4 cursor-pointer   px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
                             disabled={!userAnswers[material.id]}
                         >
                             Check Answer

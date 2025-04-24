@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Mic, MicOff, Send, Loader, AlertTriangle } from 'lucide-react';
+import {useAuthStore} from "../utils/authStore.js";
+import axios from "axios";
 
 const SpeakingTest = () => {
     const [questions, setQuestions] = useState([]);
@@ -105,64 +107,61 @@ const SpeakingTest = () => {
 
     // Handle submission
     const handleSubmit = async () => {
-        if (!audioBlob || !currentQuestion) return;
+        const { user } = useAuthStore.getState(); // get the logged-in user
+
+        if (!audioBlob || !currentQuestion || !user) return;
 
         setSubmitting(true);
 
         try {
-            // Get previous exam results from localStorage
             const examResultsString = localStorage.getItem('lastExamResults');
             let examResults = examResultsString ? JSON.parse(examResultsString) : null;
 
             if (!examResults) {
-                // Create a new results object if none exists
                 examResults = {
                     submittedAt: new Date().toISOString(),
                     questionsWithAnswers: []
                 };
             }
 
-            // Convert audio blob to base64 string for storage
+            examResults.questionsWithAnswers = examResults.questionsWithAnswers.filter(
+                question => question.userAnswer !== null
+            );
+
             const reader = new FileReader();
             reader.readAsDataURL(audioBlob);
 
-            reader.onloadend = () => {
+            reader.onloadend = async () => {
                 const base64AudioData = reader.result;
 
-                // Add speaking question answer to the results
-                examResults.speakingTest = examResults.speakingTest || [];
-                examResults.speakingTest.push({
+                const speakingResponse = {
                     questionId: currentQuestion._id,
                     type: currentQuestion.type,
                     question: currentQuestion.question,
-                    audioData: base64AudioData.substring(0, 50) + '... [data truncated for logging]', // Truncate for logging
+                    audioData: base64AudioData,
                     answeredAt: new Date().toISOString()
-                });
-
-                // Store full data in localStorage
-                const fullExamResults = {
-                    ...examResults,
-                    speakingTest: [{
-                        questionId: currentQuestion._id,
-                        type: currentQuestion.type,
-                        question: currentQuestion.question,
-                        audioData: base64AudioData,
-                        answeredAt: new Date().toISOString()
-                    }]
                 };
 
+                examResults.speakingTest = examResults.speakingTest || [];
+                examResults.speakingTest.push(speakingResponse);
+
+                const fullExamResults = {
+                    userId: user.id, 
+                    ...examResults
+                };
+
+                // Save to localStorage
                 localStorage.setItem('lastExamResults', JSON.stringify(fullExamResults));
 
-                // Log the results (truncated for console)
-                console.log("Complete exam results:", examResults);
-                console.log("Speaking test submission successful!");
-                console.log("Audio data stored in localStorage under 'lastExamResults'");
+                // 🔥 POST to your backend API
+                await axios.post('http://localhost:5001/api/exam-results', fullExamResults); // adjust URL if hosted differently
 
+                console.log("✅ Speaking test submission successful!");
                 setSubmitting(false);
                 setSubmitted(true);
             };
         } catch (err) {
-            console.error('Error saving speaking test:', err);
+            console.error('❌ Error saving speaking test:', err);
             setError('Failed to save your speaking response');
             setSubmitting(false);
         }

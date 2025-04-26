@@ -25,6 +25,7 @@ import SpeakingQuestions from "./pages/admin/speakingQuestions.jsx";
 import SpeakingTest from "./pages/speakingTest.jsx";
 import ExamResultsPage from "./pages/admin/ExamEvaluation.jsx";
 import ExamGradingPage from "./pages/admin/AssignMarks.jsx";
+import UserExamResults from "./pages/exam-list.jsx";
 
 const App = () => {
     return (
@@ -62,6 +63,12 @@ const App = () => {
                 <Route path="/admin/reading-materials" element={<ReadingMaterials />} />
                 <Route path="/admin/reading-materials/add" element={<AddReadingMaterial />} />
                 <Route path="/admin/reading-materials/edit/:slug" element={<EditReadingMaterials />} />
+                <Route path="/admin/payment-history" element={<PaymentHistory />} />
+                <Route path="/admin/create-exam" element={<PteCreateForm />} />
+                <Route path="/admin/exam-question" element={<ExamQuestions />} />
+                <Route path="/admin/speakingQuestions" element={<SpeakingQuestions />} />
+                <Route path="/admin/exam-results" element={<ExamResultsPage />} />
+                <Route path="/admin/exam-results/assign-marks" element={<ExamGradingPage />} />
 
                 <Route path="/user/dashboard" element={<UserDashboard />} />
                 <Route path="/learn" element={<Learn />} />
@@ -72,17 +79,13 @@ const App = () => {
                 <Route path="/payment" element={<PaymentButton />} />
                 <Route path="/payment/success" element={<PaymentSuccess />} />
                 <Route path="/payment/failure" element={<PaymentFailure />} />
-                <Route path="/admin/payment-history" element={<PaymentHistory />} />
-                <Route path="/admin/create-exam" element={<PteCreateForm />} />
-            <Route path="/admin/exam-question" element={<ExamQuestions />} />
-                <Route path="/admin/speakingQuestions" element={<SpeakingQuestions />} />
-                <Route path="/admin/exam-results" element={<ExamResultsPage />} />
-                <Route path="/admin/exam-results/assign-marks" element={<ExamGradingPage />} />
 
 
-<Route path="/exam" element={<ExamSelectionPage />} />
+                <Route path="/exam" element={<ExamSelectionPage />} />
                 <Route path="/exam-room" element={<ExamRoom />} />
                 <Route path="/exam/speaking-test" element={<SpeakingTest />} />
+                <Route path="/profile/exam-list" element={<UserExamResults />} />
+
             </Routes>
         </Router>
     );

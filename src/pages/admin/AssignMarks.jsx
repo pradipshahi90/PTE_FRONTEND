@@ -4,6 +4,10 @@ import {
     Save, ChevronDown, ChevronUp,
     Loader, Award, User, Calendar
 } from 'lucide-react';
+import {useNavigate} from "react-router-dom";
+
+import toast from "react-hot-toast";
+import AdminLayout from "../../layouts/AdminLayout.jsx";
 
 const ExamGradingPage = () => {
     const [examData, setExamData] = useState(null);
@@ -13,6 +17,8 @@ const ExamGradingPage = () => {
     const [possibleScore, setPossibleScore] = useState(0);
     const [percentage, setPercentage] = useState(0);
     const [expandedQuestions, setExpandedQuestions] = useState({});
+    const navigate = useNavigate(); // ✅ Call it at the top level
+
 
     useEffect(() => {
         // Get exam data from localStorage
@@ -102,30 +108,78 @@ const ExamGradingPage = () => {
         calculateScores(examData, updatedGrades);
     };
 
-    const handleSubmit = () => {
-        if (!examData) return;
+    // Function to update the exam result via API
+    const updateExamResultStatus = async (examData) => {
+        try {
+            // Extract the necessary data
+            const { _id, score, isResultChecked } = examData;
 
-        // Create updated exam data with new scores
-        const updatedExamData = {
-            ...examData,
-            score: {
-                score: totalScore,
-                possibleScore: possibleScore,
-                percentage: percentage
-            },
-            isResultChecked: true
-        };
+            // Create the payload
+            const updatePayload = {
+                totalMarks: score.score, // Use the score as totalMarks
+                isResultChecked: true    // Mark as checked
+            };
 
-        // Update localStorage
-        localStorage.setItem('selectedResult', JSON.stringify(updatedExamData));
-        console.log('uploaded Result',updatedExamData);
-        // Here you would typically send the updated data to your API
-        alert(`Grading completed! Total Score: ${totalScore}/${possibleScore} (${percentage}%)`);
+            console.log('Sending update to API:', updatePayload);
 
-        // In a real application, you would have an API call here
-        // Example: await axios.put(`/api/exam-results/${examData._id}`, updatedExamData);
+            // Make the API call
+            const response = await fetch(`http://localhost:5001/api/exam-results/${_id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatePayload),
+            });
+
+            // Check if the request was successful
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`API Error: ${errorData.message || response.statusText}`);
+            }
+
+            const result = await response.json();
+            console.log('Exam result updated successfully:', result);
+            navigate("/admin/exam-results");
+            return result;
+        } catch (error) {
+            console.error('Failed to update exam result:', error);
+            throw error;
+        }
     };
 
+// Updated handleSubmit function with API call
+    const handleSubmit = async () => {
+        if (!examData) return;
+
+        try {
+            // Create updated exam data with new scores
+            const updatedExamData = {
+                ...examData,
+                score: {
+                    score: totalScore,
+                    possibleScore: possibleScore,
+                    percentage: percentage
+                },
+                isResultChecked: true
+            };
+
+            // Update localStorage
+            localStorage.setItem('selectedResult', JSON.stringify(updatedExamData));
+            console.log('Updated exam data:', updatedExamData);
+
+            // Make the API call to update the status
+            const apiResult = await updateExamResultStatus(updatedExamData);
+
+            // Show success message to user
+            // This could be a toast notification or other UI feedback
+            toast.success('Exam result has been successfully updated!');
+
+        } catch (error) {
+            // Handle errors - could show error message to user
+            console.error('Error during submission:', error);
+            toast.error('Failed to update the exam result. Please try again.');
+        }
+    };
     const toggleQuestion = (questionId) => {
         setExpandedQuestions(prev => ({
             ...prev,
@@ -159,6 +213,8 @@ const ExamGradingPage = () => {
     };
 
     return (
+        <AdminLayout>
+
         <div className="container mx-auto px-4 py-8">
             <div className="bg-white rounded-lg shadow-md p-6 mb-8">
                 <h1 className="text-2xl font-bold mb-2">
@@ -496,6 +552,8 @@ const ExamGradingPage = () => {
                 </button>
             </div>
         </div>
+        </AdminLayout>
+
     );
 };
 

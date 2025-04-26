@@ -85,10 +85,10 @@ export default function Header() {
                             {dropdownOpen && (
                                 <div className="absolute right-0 top-10 mt-2 w-40 bg-white shadow-md rounded-md border z-50">
                                     <a
-                                        href={`${user.role}/dashboard`}
+                                        href="/profile/exam-list"
                                         className="block px-4 py-2 hover:bg-gray-100"
                                     >
-                                        Dashboard
+                                        Exam Results
                                     </a>
                                     <button
                                         onClick={handleLogout}

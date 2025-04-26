@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import AdminLayout from "../../layouts/AdminLayout.jsx";
 
 const ExamResultsPage = () => {
     const [examResults, setExamResults] = useState([]);
@@ -39,7 +40,9 @@ const ExamResultsPage = () => {
 
     const viewDetails = (result) => {
         setSelectedResult(result);
+        console.log('result',result);
     };
+
 
     const closeDetails = () => {
         setSelectedResult(null);
@@ -92,6 +95,8 @@ const ExamResultsPage = () => {
     };
 
     return (
+        <AdminLayout>
+
         <div className="min-h-screen bg-gray-50 p-6">
             <div className="max-w-7xl mx-auto">
                 <header className="mb-8">
@@ -222,7 +227,7 @@ const ExamResultsPage = () => {
                                 </button>
                             </div>
                             <div className="p-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div className=" gap-6 mb-6">
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                         <h3 className="text-lg font-semibold text-gray-800 mb-2">Exam Information</h3>
                                         <div className="space-y-2">
@@ -240,51 +245,10 @@ const ExamResultsPage = () => {
                                                 <span className="text-gray-600">Submitted:</span>
                                                 <span>{selectedResult.submittedAt ? formatDate(selectedResult.submittedAt) : 'N/A'}</span>
                                             </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Status:</span>
-                                                <span className={`font-semibold ${selectedResult.isResultChecked ? 'text-green-600' : 'text-yellow-600'}`}>
-                          {selectedResult.isResultChecked ? 'Checked' : 'Pending Review'}
-                        </span>
-                                            </div>
+
                                         </div>
                                     </div>
 
-                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                        <h3 className="text-lg font-semibold text-gray-800 mb-2">Score Summary</h3>
-                                        {selectedResult.isResultChecked ? (
-                                            <div className="space-y-2">
-                                                <div className="flex justify-between">
-                                                    <span className="text-gray-600">Total Marks:</span>
-                                                    <span className="font-semibold text-lg text-green-600">
-                            {selectedResult.totalMarks ? `${selectedResult.totalMarks}%` : 'Not scored'}
-                          </span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span className="text-gray-600">Questions Attempted:</span>
-                                                    <span>{selectedResult.questionsWithAnswers ? selectedResult.questionsWithAnswers.length : 0}</span>
-                                                </div>
-                                                {selectedResult.speakingTest && selectedResult.speakingTest.length > 0 && (
-                                                    <div className="flex justify-between">
-                                                        <span className="text-gray-600">Speaking Test:</span>
-                                                        <span>{selectedResult.speakingTest.length} submissions</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div>
-                                                <div className="mb-3 text-sm text-yellow-600">This exam is waiting to be scored.</div>
-                                                <button
-                                                    onClick={() => assignMarks(selectedResult._id)}
-                                                    className="w-full py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-md transition-colors duration-300 flex items-center justify-center"
-                                                >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                                    </svg>
-                                                    Assign Marks Now
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
                                 </div>
 
                                 {/* Questions With Answers Section */}
@@ -403,49 +367,35 @@ const ExamResultsPage = () => {
                                                     <p className="text-gray-700 mb-3">{item.question}</p>
                                                     {item.audioPath && (
                                                         <div className="mt-2">
-                                                            <audio controls className="w-full" src={item.audioPath}>
+                                                            <audio controls className="w-full" src={`http://localhost:5001${item.audioPath}`}>
                                                                 Your browser does not support the audio element.
                                                             </audio>
                                                         </div>
                                                     )}
+
                                                     {selectedResult.isResultChecked ? (
                                                         item.score ? (
                                                             <div className="mt-3 flex justify-between items-center bg-gray-50 p-2 rounded border border-gray-200">
                                                                 <span className="text-gray-600">Score:</span>
                                                                 <span className="font-semibold">{item.score}/{item.maxScore || 10}</span>
                                                             </div>
-                                                        ) : (
-                                                            <div className="mt-3 text-sm text-yellow-600">No score assigned yet.</div>
-                                                        )
-                                                    ) : (
-                                                        <div className="mt-3 text-sm text-gray-500">Requires manual assessment.</div>
-                                                    )}
+                                                        ) : null
+                                                    ) : null}
+
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
                                 )}
 
-                                <div className="mt-6 flex justify-end space-x-3">
-                                    <button
-                                        onClick={closeDetails}
-                                        className="py-2 px-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-md transition-colors duration-300"
-                                    >
-                                        Close
-                                    </button>
-                                    <button
-                                        onClick={() => assignMarks(selectedResult._id)}
-                                        className={`py-2 px-4 ${selectedResult.isResultChecked ? 'bg-blue-100 hover:bg-blue-200 text-blue-700' : 'bg-blue-500 hover:bg-blue-600 text-white'} font-medium rounded-md shadow-sm transition-colors duration-300`}
-                                    >
-                                        {selectedResult.isResultChecked ? 'Edit Marks' : 'Assign Marks'}
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     </div>
                 )}
             </div>
         </div>
+        </AdminLayout>
+
     );
 };
 

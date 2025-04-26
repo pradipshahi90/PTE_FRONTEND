@@ -23,6 +23,8 @@ import ExamSelectionPage from "./pages/ExamList.jsx";
 import ExamRoom from "./pages/give-exam.jsx";
 import SpeakingQuestions from "./pages/admin/speakingQuestions.jsx";
 import SpeakingTest from "./pages/speakingTest.jsx";
+import ExamResultsPage from "./pages/admin/ExamEvaluation.jsx";
+import ExamGradingPage from "./pages/admin/AssignMarks.jsx";
 
 const App = () => {
     return (
@@ -74,12 +76,13 @@ const App = () => {
                 <Route path="/admin/create-exam" element={<PteCreateForm />} />
             <Route path="/admin/exam-question" element={<ExamQuestions />} />
                 <Route path="/admin/speakingQuestions" element={<SpeakingQuestions />} />
+                <Route path="/admin/exam-results" element={<ExamResultsPage />} />
+                <Route path="/admin/exam-results/assign-marks" element={<ExamGradingPage />} />
 
 
 <Route path="/exam" element={<ExamSelectionPage />} />
                 <Route path="/exam-room" element={<ExamRoom />} />
                 <Route path="/exam/speaking-test" element={<SpeakingTest />} />
-
             </Routes>
         </Router>
     );

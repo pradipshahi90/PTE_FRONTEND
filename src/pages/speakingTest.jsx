@@ -124,9 +124,22 @@ const SpeakingTest = () => {
                 };
             }
 
+            // Filter out questions with null userAnswer
             examResults.questionsWithAnswers = examResults.questionsWithAnswers.filter(
                 question => question.userAnswer !== null
             );
+
+            // Remove duplicate questions based on questionText
+            const uniqueQuestionsMap = new Map();
+
+            examResults.questionsWithAnswers.forEach((q) => {
+                if (!uniqueQuestionsMap.has(q.questionText)) {
+                    uniqueQuestionsMap.set(q.questionText, q);
+                }
+            });
+
+            // Now set the questions with unique questionText only
+            examResults.questionsWithAnswers = Array.from(uniqueQuestionsMap.values());
 
             const reader = new FileReader();
             reader.readAsDataURL(audioBlob);
@@ -146,9 +159,11 @@ const SpeakingTest = () => {
                 examResults.speakingTest.push(speakingResponse);
 
                 const fullExamResults = {
-                    userId: user.id, 
+                    userId: user.id,
                     ...examResults
                 };
+
+                console.log('examResults', examResults);
 
                 // Save to localStorage
                 localStorage.setItem('lastExamResults', JSON.stringify(fullExamResults));

@@ -4,6 +4,8 @@ export class Api {
     static BASE_URL = BASE_URL;
     static LOGIN = `${Api.BASE_URL}/auth/login`;
     static REGISTER = `${Api.BASE_URL}/auth/register`;
+    static SEND_OTP = `${Api.BASE_URL}/auth/send-otp`;
+
 
     static ADD_READING_MATERIAL = `${Api.BASE_URL}/reading-materials/create`;
     static GET_READING_MATERIAL = `${Api.BASE_URL}/reading-materials`;

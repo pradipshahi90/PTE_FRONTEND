@@ -4,7 +4,10 @@ export class Api {
     static BASE_URL = BASE_URL;
     static LOGIN = `${Api.BASE_URL}/auth/login`;
     static REGISTER = `${Api.BASE_URL}/auth/register`;
-    static SEND_OTP = `${Api.BASE_URL}/auth/send-otp`;
+    static VERIFY_OTP = `${Api.BASE_URL}/auth/verify-otp`;
+    static FORGOT_PASSWORD = `${Api.BASE_URL}/auth/forgot-password`;
+    static RESEND_OTP = `${Api.BASE_URL}/auth/forgot-password`;
+    static RESET_PASSWORD = `${Api.BASE_URL}/auth/reset-password`;
 
 
     static ADD_READING_MATERIAL = `${Api.BASE_URL}/reading-materials/create`;

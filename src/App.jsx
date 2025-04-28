@@ -26,6 +26,8 @@ import SpeakingTest from "./pages/speakingTest.jsx";
 import ExamResultsPage from "./pages/admin/ExamEvaluation.jsx";
 import ExamGradingPage from "./pages/admin/AssignMarks.jsx";
 import UserExamResults from "./pages/exam-list.jsx";
+import ForgotPassword from "./pages/forgotPassword.jsx";
+import PasswordReset from "./pages/reset-password.jsx";
 
 const App = () => {
     return (
@@ -59,6 +61,9 @@ const App = () => {
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password/:resetToken" element={<PasswordReset />} />
+
                 <Route path="/admin/dashboard" element={<Dashboard />} />
                 <Route path="/admin/reading-materials" element={<ReadingMaterials />} />
                 <Route path="/admin/reading-materials/add" element={<AddReadingMaterial />} />

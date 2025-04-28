@@ -41,7 +41,7 @@ const Login = () => {
                 if(data.user.role==="user"){
                     navigate("/");
                 } else if(data.user.role==="admin")
-                navigate("/admin/dashboard");
+                    navigate("/admin/dashboard");
             },
             (error) => {
                 toast.error(error);
@@ -90,6 +90,10 @@ const Login = () => {
                 </form>
                 <p className="mt-4 text-[16px] font-[500]">
                     Don't have an account? <a className="text-blue-400 cursor-pointer" href="/register">Sign up</a>
+                </p>
+
+                <p className="mt-2 text-center">
+                    <a className="text-blue-400 cursor-pointer" href="/forgot-password">Forgot Password?</a>
                 </p>
             </div>
         </div>

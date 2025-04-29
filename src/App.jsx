@@ -28,6 +28,7 @@ import ExamGradingPage from "./pages/admin/AssignMarks.jsx";
 import UserExamResults from "./pages/exam-list.jsx";
 import ForgotPassword from "./pages/forgotPassword.jsx";
 import PasswordReset from "./pages/reset-password.jsx";
+import CourseManagement from "./pages/admin/courses.jsx";
 
 const App = () => {
     return (
@@ -74,6 +75,7 @@ const App = () => {
                 <Route path="/admin/speakingQuestions" element={<SpeakingQuestions />} />
                 <Route path="/admin/exam-results" element={<ExamResultsPage />} />
                 <Route path="/admin/exam-results/assign-marks" element={<ExamGradingPage />} />
+                <Route path="/admin/courses" element={<CourseManagement />} />
 
                 <Route path="/user/dashboard" element={<UserDashboard />} />
                 <Route path="/learn" element={<Learn />} />

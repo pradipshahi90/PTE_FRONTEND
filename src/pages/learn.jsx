@@ -4,10 +4,12 @@ import toast from "react-hot-toast";
 import { GenericRepo } from "../repo/GenericRepo.js";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../utils/authStore.js";
-import { Lock } from "lucide-react";
+import {ChevronLeft, ChevronRight, Lock} from "lucide-react";
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
 import PaymentModal from "../components/PaymentModal.jsx";
+import axios from "axios";
+import {motion} from "framer-motion";
 
 const Learn = () => {
     const navigate = useNavigate();
@@ -18,6 +20,31 @@ const Learn = () => {
     const [results, setResults] = useState({});
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const currentUser = useAuthStore.getState().user;
+    const [courses, setCourses] = useState([]);
+    const [index, setIndex] = useState(0);
+
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                const res = await axios.get("http://localhost:5001/api/courses/get-courses");
+                setCourses(res.data.data);
+            } catch (error) {
+                console.error("Error fetching courses:", error);
+            }
+        };
+
+        fetchCourses();
+    }, []);
+
+    const maxIndex = Math.max(0, Math.ceil(courses.length / 3) - 1);
+
+    const nextSlide = () => {
+        if (index < maxIndex) setIndex((prev) => prev + 1);
+    };
+
+    const prevSlide = () => {
+        if (index > 0) setIndex((prev) => prev - 1);
+    };
 
 
     const getReadingMaterials = () => {
@@ -252,6 +279,53 @@ const Learn = () => {
     return (
         <div className="container mx-auto flex flex-col gap-8">
             <Header/>
+            <div className="relative w-full mx-auto overflow-hidden p-6">
+                <h2 className="text-2xl font-semibold">Practise Courses</h2>
+                <p className="text-gray-400 mb-4">Download these courses and get your desired score. </p>
+                <div className="flex items-center justify-between mb-4">
+                    <button
+                        onClick={prevSlide}
+                        disabled={index === 0}
+                        className={`p-2 rounded-full transition ${index === 0 ? "bg-gray-300 cursor-not-allowed" : "bg-gray-200 hover:bg-gray-300"}`}
+                    >
+                        <ChevronLeft className="w-6 h-6 text-gray-600"/>
+                    </button>
+
+                    <button
+                        onClick={nextSlide}
+                        disabled={index === maxIndex}
+                        className={`p-2 rounded-full transition ${index === maxIndex ? "bg-gray-300 cursor-not-allowed" : "bg-gray-200 hover:bg-gray-300"}`}
+                    >
+                        <ChevronRight className="w-6 h-6 text-gray-600"/>
+                    </button>
+                </div>
+
+                <div className="overflow-hidden">
+                    <motion.div
+                        animate={{x: `-${index * 100}%`}}
+                        transition={{ease: "easeOut", duration: 0.5}}
+                        className="flex gap-4"
+                    >
+                        {courses.map((course) => (
+                            <div key={course._id}
+                                 className="w-1/3 border border-black flex-shrink-0 bg-white rounded-lg p-4">
+                                <img src={course.course_image} alt={course.course_name}
+                                     className="p-4 border border-black rounded-xl object-cover w-full h-48"/>
+                                <h3 className="text-lg font-medium mt-2">{course.course_name}</h3>
+                                <a
+                                    href={course.course_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="mt-2 w-full block text-center px-4 py-2 bg-blue-500 text-white rounded-xl cursor-pointer transition hover:bg-blue-600"
+                                >
+                                    Learn More
+                                </a>
+                            </div>
+                        ))}
+                    </motion.div>
+                </div>
+            </div>
+
             <div className="">
 
                 <div className="mb-8">

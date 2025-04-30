@@ -22,6 +22,7 @@ const navItems = [
     { label: 'Exams List', href: '/admin/exam-question', icon: ListChecks },
     { label: 'Speaking Questions', href: '/admin/speakingQuestions', icon: Mic },
     { label: 'Exam Results', href: '/admin/exam-results', icon: BarChart },
+    { label: 'Courses', href: '/admin/courses', icon: ListChecks },
 ];
 
 export default function AdminSidebar() {
@@ -41,10 +42,10 @@ export default function AdminSidebar() {
     return (
         <>
             {/* Hamburger for mobile */}
-            <div className="md:hidden fixed top-5 right-1/2 z-50">
+            <div className="md:hidden fixed top-4 right-1/2 z-50">
                 <button
                     onClick={toggleSidebar}
-                    className="rounded-full bg-blue-600 text-white p-2 shadow-lg hover:bg-blue-700 transition"
+                    className="rounded-full bg-blue-600 text-white p-1 shadow-lg hover:bg-blue-700 transition"
                 >
                     {isOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>

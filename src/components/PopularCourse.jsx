@@ -1,31 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import heroImage from '../assets/hero.svg'; // Adjust the path as needed
 
-const courses = [
-    { id: 1, title: "Course 1", img: "https://via.placeholder.com/300" },
-    { id: 2, title: "Course 2", img: "https://via.placeholder.com/300" },
-    { id: 3, title: "Course 3", img: "https://via.placeholder.com/300" },
-    { id: 4, title: "Course 4", img: "https://via.placeholder.com/300" },
-    { id: 5, title: "Course 5", img: "https://via.placeholder.com/300" },
-    { id: 6, title: "Course 6", img: "https://via.placeholder.com/300" }
-];
 
 export default function PopularCourse() {
+    const [courses, setCourses] = useState([]);
     const [index, setIndex] = useState(0);
-    const maxIndex = Math.ceil(courses.length / 3) - 1;
+
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                const res = await axios.get("http://localhost:5001/api/courses/get-courses");
+                setCourses(res.data.data);
+            } catch (error) {
+                console.error("Error fetching courses:", error);
+            }
+        };
+
+        fetchCourses();
+    }, []);
+
+    const maxIndex = Math.max(0, Math.ceil(courses.length / 3) - 1);
 
     const nextSlide = () => {
-        if (index < maxIndex) {
-            setIndex((prev) => prev + 1);
-        }
+        if (index < maxIndex) setIndex((prev) => prev + 1);
     };
 
     const prevSlide = () => {
-        if (index > 0) {
-            setIndex((prev) => prev - 1);
-        }
+        if (index > 0) setIndex((prev) => prev - 1);
     };
 
     return (
@@ -48,19 +51,24 @@ export default function PopularCourse() {
                 </button>
             </div>
 
-            <div className=" overflow-hidden">
+            <div className="overflow-hidden">
                 <motion.div
                     animate={{ x: `-${index * 100}%` }}
                     transition={{ ease: "easeOut", duration: 0.5 }}
                     className="flex gap-4"
                 >
                     {courses.map((course) => (
-                        <div key={course.id} className="w-1/3 border border-black flex-shrink-0 bg-white rounded-lg p-4">
-                            <img src={heroImage} alt={course.title} className="p-4 border border-black rounded-xl object-cover" />
-                            <h3 className="text-lg font-medium mt-2">{course.title}</h3>
-                            <button className="mt-2 w-full px-4 py-2 bg-blue-500 text-white rounded-xl cursor-pointer transition">
+                        <div key={course._id} className="w-1/3 border border-black flex-shrink-0 bg-white rounded-lg p-4">
+                            <img src={course.course_image} alt={course.course_name} className="p-4 border border-black rounded-xl object-cover w-full h-48" />
+                            <h3 className="text-lg font-medium mt-2">{course.course_name}</h3>
+                            <a
+                                href={course.course_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mt-2 w-full block text-center px-4 py-2 bg-blue-500 text-white rounded-xl cursor-pointer transition hover:bg-blue-600"
+                            >
                                 Learn More
-                            </button>
+                            </a>
                         </div>
                     ))}
                 </motion.div>
